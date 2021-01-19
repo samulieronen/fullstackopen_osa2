@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import Persons from './components/Persons'
 import Filter from './components/Filter'
 import Form from './components/Form'
@@ -6,19 +7,22 @@ import Form from './components/Form'
 
 const App = () => {
 
-	const [persons, setPersons] = useState([
-		{name: 'Arto Hellas', number: '040-1231244'},
-		{name: 'Ada Lovelace', number: '39-44-5323523'},
-		{name: 'Dan Abramov', number: '12-43-234345'},
-		{name: 'Mary Poppendieck', number: '39-23-6423122'}
-	])
-
+	const [persons, setPersons] = useState([])
 	const [newName, setNewName] = useState('')
 	const [newNumber, setNewNumber] = useState('')
 	const [filter, setFilter] = useState('')
 	const handleNameField = (event) => setNewName(event.target.value)
 	const handleNumberField = (event) => setNewNumber(event.target.value)
 	const handleFilterField = (event) => setFilter(event.target.value)
+
+	useEffect(() => {
+		axios
+			.get('http://localhost:3001/persons')
+			.then(response => {
+				console.log('got response!')
+				setPersons(response.data)
+			})
+	}, [])
 
 	function checker(person, newName, newNumber) {
 		if (person.name.toLowerCase() === newName.toLowerCase()) {
