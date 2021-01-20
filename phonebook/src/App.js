@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import personServices from './services/persons'
 import Persons from './components/Persons'
 import Filter from './components/Filter'
 import Form from './components/Form'
@@ -15,24 +15,25 @@ const App = () => {
 	const handleNumberField = (event) => setNewNumber(event.target.value)
 	const handleFilterField = (event) => setFilter(event.target.value)
 
-	useEffect(() => {
-		axios
-			.get('http://localhost:3001/persons')
-			.then(response => {
-				console.log('got response!')
-				setPersons(response.data)
-			})
-	}, [])
-
-	function checker(person, newName, newNumber) {
-		if (person.name.toLowerCase() === newName.toLowerCase()) {
-			return false
+	const handleRemove = (person) => {
+		console.log('About to remove item nb', person.id)
+		const res = window.confirm(`Deleting ${person.name} from your phonebook.`)
+		if (res) {
+			personServices
+				.remove(person.id)
+				.then(response => console.log(response))
 		}
-		else if (person.number === newNumber) {
-			return false
-		}
-		return true
+		setPersons(persons.filter(current => current.id !== person.id))
 	}
+
+	useEffect(() => {
+		personServices
+			.all()
+			.then(response => {
+				setPersons(response)
+			})
+			.catch(() => alert('An error occured while fetching data!'))
+	}, [])
 
 	function addName(event) {
 		event.preventDefault()
@@ -40,18 +41,30 @@ const App = () => {
 			name: newName,
 			number: newNumber
 		}
-		if (persons.every(person => checker(person, newName, newNumber))) {
+		const dup = persons.filter(person => person.name.toLowerCase() === newName.toLowerCase())
+		const oldPerson = dup[0]
+		if (!dup.length) {
+			personServices
+				.create(Name)
+				.catch(() => alert('An error occured while deleting data!'))
 			setPersons(persons.concat(Name))
-			setNewName('')
-			setNewNumber('')
-			console.log('added name:', newName, 'number:', newNumber)
+			console.log('added name:', newName, 'and number:', newNumber)
 		}
 		else {
-			alert(`${newName} or ${newNumber} already exists!`)
-			setNewName('')
-			setNewNumber('')
-			console.log(`${newName} or ${newNumber} already existed!`)
+			if (window.confirm(`${newName} is already in phonebook. Do you want to update the number?`)) {
+				const updatedPerson = {...dup[0], number: newNumber}
+				console.log(oldPerson, updatedPerson)
+				personServices
+					.put(updatedPerson.id, updatedPerson)
+					.then(response => {
+						setPersons(persons.map(person => (person.id !== updatedPerson.id) ? person : response))
+					})
+					.catch(() => alert('An error occured while inserting data!'))
+				console.log(`${newName} updated!`)
+			}
 		}
+		setNewName('')
+		setNewNumber('')
 	}
 
 	return (
@@ -67,7 +80,15 @@ const App = () => {
 					handleNumber={handleNumberField}
 			/>
 			<h2>Numbers</h2>
-			{persons.map(person => <div key={person.name}><Persons person={person} filter={filter}/></div>)}
+			{persons.map(person =>
+				<div key={person.name}>
+					<Persons
+						person={person}
+						filter={filter}
+						action={() => handleRemove(person)}
+					/>
+				</div>
+			)}
 		</div>
 	)
 }

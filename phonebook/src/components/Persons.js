@@ -1,16 +1,19 @@
 import React from 'react'
+import Button from './Button'
 
-const Persons = ({person, filter}) => {
+const Persons = ({person, filter, action}) => {
 	if (person.name.toLowerCase().includes(filter.toLowerCase())) {
-        return (
-            <h3>{person.name}: {person.number}</h3>
-        )
-    }
-    else {
-        return (
-            <div></div>
-        )
-    }
+		return (
+			<div>
+				<h3>{person.name}: {person.number}  <Button action={action} id={person.id} text={'Delete'}/></h3>
+			</div>
+		)
+	}
+	else {
+		return (
+			<div></div>
+		)
+	}
 }
 
 export default Persons
