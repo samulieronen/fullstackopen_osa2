@@ -11,3 +11,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.statusMsg {
+  color: green;
+  font-style: bold;
+}
+
+.errorMsg {
+  color: red;
+  font-style: bold;
+}

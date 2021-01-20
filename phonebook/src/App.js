@@ -4,6 +4,21 @@ import Persons from './components/Persons'
 import Filter from './components/Filter'
 import Form from './components/Form'
 
+const Status = ({msg}) => {
+	if (!msg) return null
+	if (msg.toLowerCase().includes('error')) {
+		return (
+			<div className='errorMsg'>
+				<h2>{msg}</h2>
+			</div>
+		)
+	}
+	return (
+		<div className='statusMsg'>
+			<h2>{msg}</h2>
+		</div>
+	)
+}
 
 const App = () => {
 
@@ -11,9 +26,17 @@ const App = () => {
 	const [newName, setNewName] = useState('')
 	const [newNumber, setNewNumber] = useState('')
 	const [filter, setFilter] = useState('')
+	const [status, setStatus] = useState(null)
 	const handleNameField = (event) => setNewName(event.target.value)
 	const handleNumberField = (event) => setNewNumber(event.target.value)
 	const handleFilterField = (event) => setFilter(event.target.value)
+
+	function handleTimeout(msg, type) {
+		setStatus(msg)
+		setTimeout(() => {
+			setStatus(null)
+		}, 4000)
+	}
 
 	const handleRemove = (person) => {
 		console.log('About to remove item nb', person.id)
@@ -22,8 +45,9 @@ const App = () => {
 			personServices
 				.remove(person.id)
 				.then(response => console.log(response))
+			.catch(() => handleTimeout('Error while deleting contact!', setStatus))
+			setPersons(persons.filter(current => current.id !== person.id))
 		}
-		setPersons(persons.filter(current => current.id !== person.id))
 	}
 
 	useEffect(() => {
@@ -32,7 +56,7 @@ const App = () => {
 			.then(response => {
 				setPersons(response)
 			})
-			.catch(() => alert('An error occured while fetching data!'))
+			.catch(() => handleTimeout('Error while fetching contacts!', setStatus))
 	}, [])
 
 	function addName(event) {
@@ -46,9 +70,10 @@ const App = () => {
 		if (!dup.length) {
 			personServices
 				.create(Name)
-				.catch(() => alert('An error occured while deleting data!'))
+				.catch(() => handleTimeout('Error while adding contact!', setStatus))
 			setPersons(persons.concat(Name))
 			console.log('added name:', newName, 'and number:', newNumber)
+			handleTimeout(`Successfully added ${newName}`, setStatus)
 		}
 		else {
 			if (window.confirm(`${newName} is already in phonebook. Do you want to update the number?`)) {
@@ -59,8 +84,8 @@ const App = () => {
 					.then(response => {
 						setPersons(persons.map(person => (person.id !== updatedPerson.id) ? person : response))
 					})
-					.catch(() => alert('An error occured while inserting data!'))
-				console.log(`${newName} updated!`)
+					.catch(() => handleTimeout('Error while updating contact!', setStatus))
+				handleTimeout(`${newName} updated!`, setStatus)
 			}
 		}
 		setNewName('')
@@ -70,6 +95,7 @@ const App = () => {
 	return (
 		<div>
 			<h1>Phonebook</h1>
+			<Status msg={status}/>
 			<Filter	value={filter}
 					filterHandler={handleFilterField}
 			/>
