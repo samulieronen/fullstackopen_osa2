@@ -3,10 +3,14 @@ import axios from 'axios'
 import Filter from './components/Filter'
 import Countries from './components/Countries'
 
-
 const App = () => {
 	const [filter, setFilter] = useState('')
 	const handleFilterField = (event) => setFilter(event.target.value)
+
+	const chooseCountry = (want) => {
+		setFilter(want.name)
+		console.log(`Picked ${want.name}!`)
+	}	
 
 	const [weather, setWeather] = useState([])
 
@@ -32,9 +36,10 @@ const App = () => {
 						filter={filter}
 						weather={weather}
 						setWeather={setWeather}
+						chooseCountry={chooseCountry}
 			/>
 		</div>
 	)
 }
 
-export default App;
+export default App

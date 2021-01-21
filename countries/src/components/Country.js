@@ -24,7 +24,7 @@ const Country = ({ country, weather, setWeather }) => {
 			<p>Subregion: {country.subregion}</p>
 			<p>Area: {country.area} km^2</p>
 			<h3>Languages</h3>
-			<List data={country.languages}/>
+			<List data={country.languages} chooseCountry={null}/>
 			<h3>Flag</h3>
 			<img src={country.flag} alt='Flag' width='200'/>
 			<h3>Weather in {country.capital} at {weather.observation_time}</h3>

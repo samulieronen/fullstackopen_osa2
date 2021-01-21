@@ -4,7 +4,7 @@ import Country from './Country'
 
 const SearchHelper = (props) => <div><p>{props.text}</p></div>
 
-const Countries = ({countries, filter, weather, setWeather}) => {
+const Countries = ({countries, filter, weather, setWeather, chooseCountry}) => {
 
 	function getMatch(country, keyword) {
 		if (country.name.toLowerCase().includes(filter.toLowerCase())) {
@@ -13,8 +13,8 @@ const Countries = ({countries, filter, weather, setWeather}) => {
 		return false
 	}
 
-	const filtered = countries.filter(country => getMatch(country, filter))
-
+	let filtered = countries.filter(country => getMatch(country, filter))
+	
 	if (filtered.length === 1) {
 		return (
 			<Country country={filtered[0]} weather={weather} setWeather={setWeather}/>
@@ -27,7 +27,7 @@ const Countries = ({countries, filter, weather, setWeather}) => {
 	}
 	else if (filtered.length > 1 && filtered.length <= 10) {
 		return (
-				<List data={filtered}/>
+				<List data={filtered} chooseCountry={chooseCountry}/>
 		)
 	}
 	else {
