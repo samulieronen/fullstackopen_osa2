@@ -32,7 +32,12 @@ const App = () => {
 	const handleFilterField = (event) => setFilter(event.target.value)
 
 	function handleTimeout(msg, type) {
-		setStatus(msg)
+		if (type) {
+			setStatus(`Error: ${msg['error']}`)
+		}
+		else {
+			setStatus(msg)
+		}
 		setTimeout(() => {
 			setStatus(null)
 		}, 4000)
@@ -45,8 +50,9 @@ const App = () => {
 			personServices
 				.remove(person.id)
 				.then(response => console.log(response))
-			.catch(() => handleTimeout('Error while deleting contact!', setStatus))
+			.catch(error => handleTimeout(error.response.data, error))
 			setPersons(persons.filter(current => current.id !== person.id))
+			handleTimeout(`Successfully deleted ${person.name}`, null)
 		}
 	}
 
@@ -56,7 +62,7 @@ const App = () => {
 			.then(response => {
 				setPersons(response)
 			})
-			.catch(() => handleTimeout('Error while fetching contacts!', setStatus))
+			.catch(error => handleTimeout(error.response.data, error))
 	}, [])
 
 	function addName(event) {
@@ -70,10 +76,12 @@ const App = () => {
 		if (!dup.length) {
 			personServices
 				.create(Name)
-				.catch(() => handleTimeout('Error while adding contact!', setStatus))
-			setPersons(persons.concat(Name))
-			console.log('added name:', newName, 'and number:', newNumber)
-			handleTimeout(`Successfully added ${newName}`, setStatus)
+				.then(response => {
+					setPersons(persons.concat(response))
+					console.log('added name:', newName, 'and number:', newNumber)
+				})
+				.catch(error => handleTimeout(error.response.data, 1))
+			handleTimeout(`Successfully added ${newName}`, null)
 		}
 		else {
 			if (window.confirm(`${newName} is already in phonebook. Do you want to update the number?`)) {
@@ -84,8 +92,8 @@ const App = () => {
 					.then(response => {
 						setPersons(persons.map(person => (person.id !== updatedPerson.id) ? person : response))
 					})
-					.catch(() => handleTimeout('Error while updating contact!', setStatus))
-				handleTimeout(`${newName} updated!`, setStatus)
+					.catch(error => handleTimeout(error.response.data, error))
+				handleTimeout(`${newName} updated!`, null)
 			}
 		}
 		setNewName('')
